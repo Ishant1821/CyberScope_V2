@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin-bottom: 2rem;">Security Analytics & ML Research Benchmarking</h2>
+
+<!-- Top Grid Cards -->
+<div class="metrics-grid">
+    <div class="card">
+        <h3>Primary ML Engine</h3>
+        <div class="metric-value" style="font-size: 1.6rem; margin-top: 10px; white-space: normal; line-height: 1.3; color: var(--accent-cyan);">
+            Isolation Forest
+        </div>
+    </div>
+    <div class="card">
+        <h3>Targeted Telemetry</h3>
+        <div class="metric-value" style="font-size: 1.6rem; margin-top: 10px; white-space: normal; line-height: 1.3; color: var(--accent-cyan);">
+            Temp & Voltage
+        </div>
+    </div>
+    <div class="card">
+        <h3>Ingest Protocol</h3>
+        <div class="metric-value" style="font-size: 1.6rem; margin-top: 10px; white-space: normal; line-height: 1.3; color: var(--accent-cyan);">
+            REST API / JSON
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Section: Visual Analytics & Research Table -->
+<div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+    <!-- Chart Section -->
+    <div class="card" style="flex: 2; min-width: 400px;">
+        <h3>Algorithm Performance Comparison (Recall vs F1-Score)</h3>
+        <div style="position: relative; height: 320px; width: 100%; margin-top: 1rem;">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Research Metrics Table Section -->
+    <div class="card" style="flex: 1.8; min-width: 320px; padding: 0; overflow: hidden;">
+        <div style="padding: 1.5rem 1.5rem 0 1.5rem;">
+            <h3>Academic Research Metrics</h3>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">MODEL</th>
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">PRECISION</th>
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">RECALL</th>
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">F1-SCORE</th>
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">FALSE ALARMS</th>
+                        <th style="padding: 0.8rem 1rem; color: var(--text-muted); font-size: 0.8rem;">LATENCY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if benchmark_data %}
+                        {% for model_name, metrics in benchmark_data.items() %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-cyan); font-weight: 600;">{{ model_name }}</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">{{ metrics.precision }}%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">{{ metrics.recall }}%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-yellow); font-weight: bold;">{{ metrics.f1_score }}%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-red);">{{ metrics.false_positives }}</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--text-main);">{{ metrics.latency_ms }} ms</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-cyan); font-weight: 500;">Isolation Forest</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">49.75%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">79.2%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-yellow);">61.11%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-red);">400</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--text-main);">0.058 ms</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-cyan); font-weight: 500;">One-Class SVM</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">47.64%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">54.6%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-yellow);">50.88%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-red);">300</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--text-main);">0.065 ms</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-cyan); font-weight: 500;">Local Outlier Factor</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">42.15%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-green);">62.8%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-yellow);">50.44%</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--accent-red);">431</td>
+                            <td style="padding: 0.8rem 1rem; color: var(--text-main);">0.015 ms</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const benchmarkData = {{ benchmark_data | tojson | safe if benchmark_data else '{}' }};
+        
+        let labels = ['Isolation Forest', 'One-Class SVM', 'Local Outlier Factor'];
+        let recallData = [79.2, 54.6, 62.8];
+        let f1Data = [61.11, 50.88, 50.44];
+
+        if (Object.keys(benchmarkData).length > 0) {
+            labels = Object.keys(benchmarkData);
+            recallData = labels.map(key => benchmarkData[key].recall || benchmarkData[key].detection_rate);
+            f1Data = labels.map(key => benchmarkData[key].f1_score || 0);
+        }
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Recall / Detection Rate (%)',
+                        data: recallData,
+                        backgroundColor: 'rgba(56, 189, 248, 0.3)',
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'F1-Score (%)',
+                        data: f1Data,
+                        backgroundColor: 'rgba(250, 204, 21, 0.3)',
+                        borderColor: 'rgba(250, 204, 21, 1)',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#94a3b8' } 
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

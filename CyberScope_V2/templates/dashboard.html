@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Extract the absolute latest incident to display live metrics -->
+{% set latest = incidents[-1] if incidents else None %}
+
+<!-- 
+  CORRECT LOGIC:
+  - total_anomalies = total rows stored in the incidents table.
+  - normal_logs = total logs processed minus anomalies (ensuring it never drops below 0).
+  - We strictly count Warnings vs Criticals based on the text stored in index 10.
+-->
+{% set total_anomalies = incidents | length %}
+{% set normal_logs = (total_logs - total_anomalies) if total_logs > total_anomalies else 0 %}
+
+{% set warning_count = namespace(value=0) %}
+{% set critical_count = namespace(value=0) %}
+{% for inc in incidents %}
+    {% set insight = inc[10] | string | upper %}
+    {% if "WARNING" in insight %}
+        {% set warning_count.value = warning_count.value + 1 %}
+    {% elif "CRITICAL" in insight %}
+        {% set critical_count.value = critical_count.value + 1 %}
+    {% else %}
+        <!-- Catch-all for any unclassified anomaly text, defaulting to warning -->
+        {% set warning_count.value = warning_count.value + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+    <h2 style="margin: 0;">SOC Monitoring Overview</h2>
+</div>
+
+<!-- 1. Top Row: Global Metric Cards -->
+<div class="metrics-grid">
+    <div class="card">
+        <h3>Total Logs Processed</h3>
+        <div class="metric-value">{{ total_logs }}</div>
+    </div>
+    <div class="card">
+        <h3>Anomalies Flagged</h3>
+        <div class="metric-value {% if total_anomalies > 0 %}danger{% else %}success{% endif %}">{{ total_anomalies }}</div>
+    </div>
+    <div class="card">
+        <h3>Current Network Load</h3>
+        <div class="metric-value" style="color: var(--accent-cyan);">
+            {{ latest[8] if latest else 0 }} <span style="font-size: 1rem; color: var(--text-muted);">KB/s</span>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Threat Level</h3>
+        <div class="metric-value {% if total_anomalies > 5 %}danger{% elif total_anomalies > 0 %}warning{% else %}success{% endif %}">
+            {% if total_anomalies > 5 %}HIGH{% elif total_anomalies > 0 %}MEDIUM{% else %}LOW{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 2. Middle Row: Integrity Cluster & Split Charts -->
+<div class="dashboard-middle">
+    
+    <!-- Left Column: System Integrity & Traffic Split -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
+        <div class="card" style="display: flex; flex-direction: column;">
+            <h3>System Integrity</h3>
+            
+            <div class="integrity-cluster">
+                <div class="integrity-item">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">CPU Load</div>
+                    <div class="integrity-value" style="color: {% if latest and latest[4] > 85.0 %}var(--accent-red){% elif latest and latest[4] > 60.0 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                        {{ latest[4] if latest else 0 }}%
+                    </div>
+                </div>
+                
+                <div class="integrity-item">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Free Heap</div>
+                    <div class="integrity-value" style="color: {% if latest and latest[5] < 50.0 %}var(--accent-red){% elif latest and latest[5] < 100.0 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                        {{ latest[5] if latest else 0 }} KB
+                    </div>
+                </div>
+                
+                <div class="integrity-item">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Packet Drop</div>
+                    <div class="integrity-value" style="color: {% if latest and latest[6] > 15.0 %}var(--accent-red){% elif latest and latest[6] > 5.0 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                        {{ latest[6] if latest else 0 }}%
+                    </div>
+                </div>
+                
+                <div class="integrity-item">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">I2C Faults</div>
+                    <div class="integrity-value" style="color: {% if latest and latest[7] > 5 %}var(--accent-red){% elif latest and latest[7] > 0 %}var(--accent-yellow){% else %}var(--accent-green){% endif %};">
+                        {{ latest[7] if latest else 0 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; flex-grow: 1;">
+            <h3>Traffic Distribution</h3>
+            <div style="position: relative; height: 260px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <canvas id="anomalyPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Two Stacked Charts -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
+        
+        <!-- Network Traffic Chart -->
+        <div class="card chart-card" style="display: flex; flex-direction: column; flex-grow: 1;">
+            <h3>Network Traffic Volume (KB/s)</h3>
+            <div style="flex-grow: 1; position: relative; min-height: 200px; width: 100%; margin-top: 0.5rem;" id="trafficWrapper">
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+
+        <!-- CPU Utilization Chart -->
+        <div class="card chart-card" style="display: flex; flex-direction: column; flex-grow: 1;">
+            <h3>CPU Utilization (%)</h3>
+            <div style="flex-grow: 1; position: relative; min-height: 200px; width: 100%; margin-top: 0.5rem;" id="cpuWrapper">
+                <canvas id="cpuChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 3. Bottom Row: Live Incident Ledger -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 0 1.5rem;">
+        <h3 style="margin: 0;">Live Sensor Anomaly Stream</h3>
+        <button onclick="resetDashboard()" style="padding: 0.5rem 1rem; background: rgba(248, 113, 113, 0.1); color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: 4px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+            Clear Data
+        </button>
+    </div>
+    
+    <div style="margin-top: 1rem; overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Device</th>
+                    <th>Hardware</th>
+                    <th>System Load</th>
+                    <th>Network</th>
+                    <th>Timestamp</th>
+                    <th>Classification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inc in incidents[::-1][:10] %}
+                <tr>
+                    <td>#{{ inc[0] }}</td>
+                    <td><strong>{{ inc[1] }}</strong></td>
+                    <td>{{ inc[2] }} °C / {{ inc[3] }} V</td>
+                    <td>CPU: {{ inc[4] }}%</td>
+                    <td>{{ inc[8] }} KB/s</td>
+                    <td>{{ inc[9].split('T')[1][:8] }}</td>
+                    <td>
+                        {% set insight_upper = inc[10] | string | upper %}
+                        {% if "CRITICAL" in insight_upper %}
+                            <span class="status-badge danger">CRITICAL</span>
+                        {% elif "WARNING" in insight_upper %}
+                            <span class="status-badge warning">WARNING</span>
+                        {% else %}
+                            <span class="status-badge warning">WARNING</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No anomalies detected. Operations normal.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart Rendering Scripts -->
+<script>
+    // --- 3-Way Doughnut Chart ---
+    const normalCount = {{ normal_logs }};
+    const warningCount = {{ warning_count.value }};
+    const criticalCount = {{ critical_count.value }};
+
+    new Chart(document.getElementById('anomalyPieChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Normal', 'Warning', 'Critical'],
+            datasets: [{
+                data: [normalCount, warningCount, criticalCount],
+                backgroundColor: ['#4ade80', '#facc15', '#f87171'], 
+                borderColor: 'transparent',
+                borderWidth: 4,
+                hoverBorderColor: 'transparent'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { 
+                    position: 'right', 
+                    labels: { color: '#94a3b8', boxWidth: 12, padding: 15 } 
+                }
+            }
+        }
+    });
+
+    // --- Split Line Charts ---
+    const timeLabels = [];
+    const cpuValues = [];
+    const trafficValues = [];
+    
+    {% for inc in incidents[-15:] %}
+        timeLabels.push("{{ inc[9].split('T')[1][:8] }}");
+        cpuValues.push({{ inc[4] }});
+        trafficValues.push({{ inc[8] }});
+    {% endfor %}
+
+    if (timeLabels.length > 0) {
+        
+        // 1. Network Traffic Chart
+        new Chart(document.getElementById('trafficChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Network Traffic (KB/s)',
+                    data: trafficValues,
+                    borderColor: '#38bdf8', 
+                    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#38bdf8'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#38bdf8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', maxTicksLimit: 8 }
+                    }
+                }
+            }
+        });
+
+        // 2. CPU Utilization Chart
+        new Chart(document.getElementById('cpuChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'CPU Utilization (%)',
+                    data: cpuValues,
+                    borderColor: '#f87171', 
+                    backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#f87171'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#f87171' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', maxTicksLimit: 8 }
+                    }
+                }
+            }
+        });
+        
+    } else {
+        document.getElementById('trafficWrapper').innerHTML = 
+            '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--text-muted);">Awaiting network telemetry data...</div>';
+        document.getElementById('cpuWrapper').innerHTML = 
+            '<div style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--text-muted);">Awaiting CPU telemetry data...</div>';
+    }
+
+    function resetDashboard() {
+        if (confirm("Delete all historical logs?")) {
+            fetch('/api/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }})
+            .then(response => response.json())
+            .then(data => { if (data.status === "success") window.location.reload(); });
+        }
+    }
+</script>
+{% endblock %}
