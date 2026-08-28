@@ -1,0 +1,291 @@
+/* =========================================================
+   CyberScope-AI SOC Stylesheet (7D Overhaul & Layout Fixes)
+   ========================================================= */
+
+/* --- 1. Root Variables & Theme Profiles --- */
+:root, body.theme-default {
+    --bg-main: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #1e293b;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-cyan: #38bdf8;
+    --accent-red: #f87171;
+    --accent-green: #4ade80;
+    --accent-yellow: #facc15;
+    --shadow-card: rgba(0, 0, 0, 0.4);
+}
+
+body.theme-light {
+    --bg-main: #e2e8f0;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --accent-cyan: #0ea5e9;
+    --accent-red: #ef4444;
+    --accent-green: #10b981;
+    --accent-yellow: #d97706;
+    --shadow-card: rgba(0, 0, 0, 0.05);
+}
+
+body.theme-arctic {
+    --bg-main: #f0f9ff;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --border-color: #bae6fd;
+    --text-main: #0c4a6e;
+    --text-muted: #0369a1;
+    --accent-cyan: #0284c7;
+    --accent-red: #e11d48;
+    --accent-green: #059669;
+    --accent-yellow: #d97706;
+    --shadow-card: rgba(2, 132, 199, 0.08);
+}
+
+body.theme-matrix {
+    --bg-main: #050505; 
+    --bg-secondary: #0a0a0a; 
+    --bg-card: #0f0f0f;
+    --border-color: #166534; 
+    --text-main: #22c55e; 
+    --text-muted: #14532d; 
+    --accent-cyan: #16a34a; 
+    --accent-red: #dc2626; 
+    --accent-green: #22c55e;
+    --accent-yellow: #eab308; 
+    --shadow-card: rgba(0, 0, 0, 0.5);
+}
+
+body.theme-sunset {
+    --bg-main: #1e1b4b;
+    --bg-secondary: #312e81; 
+    --bg-card: #312e81;
+    --border-color: rgba(255,255,255,0.1); 
+    --text-main: #fef3c7; 
+    --text-muted: #d97706;
+    --accent-cyan: #fbbf24; 
+    --accent-red: #f87171; 
+    --accent-green: #4ade80;
+    --accent-yellow: #fcd34d; 
+    --shadow-card: rgba(0, 0, 0, 0.3);
+}
+
+/* --- 2. Global Resets & Base Styles --- */
+body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    min-height: 100vh;
+    transition: all 0.4s ease;
+}
+
+h2, h3, p { margin-top: 0; }
+a { text-decoration: none; }
+
+/* --- 3. Layout (Sidebar & Main Content) --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    margin-left: -260px;
+}
+
+.nav-links a {
+    display: block;
+    padding: 0.8rem 1rem;
+    color: var(--text-muted);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-cyan);
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0; /* Critical for keeping fluid flex/grid elements from breaking layout bounds */
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.sidebar-toggle-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--accent-cyan);
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px var(--shadow-card);
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-cyan);
+    transform: scale(1.05);
+}
+
+/* --- 4. Metric Cards & Dashboard Layout Containers --- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Main Middle Grid System (2 Columns, bounded to prevent overflow) */
+.dashboard-middle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    min-width: 0;
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-card), 0 2px 4px -1px var(--shadow-card);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-width: 0; /* Prevents flex/grid children from overflowing bounds */
+    box-sizing: border-box;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px var(--shadow-card);
+}
+
+.card h3 {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.metric-value { font-size: 2.5rem; font-weight: 700; color: var(--text-main); }
+.metric-value.danger { color: var(--accent-red); }
+.metric-value.success { color: var(--accent-green); }
+.metric-value.warning { color: var(--accent-yellow); }
+
+/* System Integrity Cluster */
+.integrity-cluster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.integrity-item {
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.integrity-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+/* --- 5. Data Tables --- */
+.table-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px var(--shadow-card);
+}
+
+table { width: 100%; border-collapse: collapse; text-align: left; }
+
+table thead th {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-muted);
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+table tbody td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+
+table tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+table tbody tr:last-child td { border-bottom: none; }
+
+.status-badge {
+    padding: 0.35rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-badge.success { background: rgba(74, 222, 128, 0.1); color: var(--accent-green); border: 1px solid var(--accent-green); }
+.status-badge.danger { background: rgba(248, 113, 113, 0.1); color: var(--accent-red); border: 1px solid var(--accent-red); }
+.status-badge.warning { background: rgba(250, 204, 21, 0.1); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+
+.upload-box {
+    border: 2px dashed var(--border-color);
+    padding: 3rem;
+    text-align: center;
+    border-radius: 12px;
+    background: var(--bg-card);
+    margin-bottom: 2rem;
+}
+
+.theme-selector {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+}

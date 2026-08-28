@@ -1,0 +1,32 @@
+{
+    "Isolation Forest": {
+        "detection_rate": 100.0,
+        "precision": 55.56,
+        "recall": 100.0,
+        "f1_score": 71.43,
+        "accuracy": 96.19,
+        "false_positives": 400,
+        "time_taken": 0.4529,
+        "latency_ms": 0.04314
+    },
+    "One-Class SVM": {
+        "detection_rate": 100.0,
+        "precision": 20.85,
+        "recall": 100.0,
+        "f1_score": 34.51,
+        "accuracy": 81.92,
+        "false_positives": 1898,
+        "time_taken": 3.8714,
+        "latency_ms": 0.36871
+    },
+    "Local Outlier Factor": {
+        "detection_rate": 100.0,
+        "precision": 53.19,
+        "recall": 100.0,
+        "f1_score": 69.44,
+        "accuracy": 95.81,
+        "false_positives": 440,
+        "time_taken": 0.1762,
+        "latency_ms": 0.01678
+    }
+}
