@@ -8,19 +8,19 @@ CyberScope-AI is a lightweight, machine-learning-powered Security Information an
 
 ### 1. SOC Monitoring Overview Dashboard
 *The primary glassmorphism interface displaying real-time system integrity clusters, 3-way traffic distribution, and isolated network/CPU trendlines.*
-![Dashboard Overview]("Assets CS_V2/dashboard.png")
+![Dashboard Overview](Assets%20CS_V2/dashboard.png)
 
 ### 2. Multi-Model Performance Comparison
 *Benchmark analysis evaluating the Isolation Forest model against alternative algorithms across high-dimensional telemetry matrices.*
-![Model Comparison]("Assets CS_V2/comparision.png")
+![Model Comparison](Assets%20CS_V2/comparision.png)
 
 ### 3. Incident Management Ledger
 *The historical tracking and compliance log featuring color-coded threat severity tiers and instant CSV/PDF export options.*
-![Incident Ledger]("Assets CS_V2/incidents.png")
+![Incident Ledger](Assets%20CS_V2/incidents.png)
 
 ### 4. Advanced Log Analyzer
 *Dedicated tool for parsing and auditing batch log files against the unsupervised anomaly detection engine.*
-![Log Analyzer]("Assets CS_V2/loganalyser.png")
+![Log Analyzer](Assets%20CS_V2/loganalyser.png)
 
 ---
 
