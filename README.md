@@ -3,17 +3,39 @@
 CyberScope-AI is an advanced, lightweight, machine-learning-powered SIEM platform engineered specifically for monitoring resource-constrained IoT edge networks (such as ESP32 microcontrollers). Version 2.0 introduces a robust **7-Dimensional telemetry ingestion engine**, unsupervised anomaly detection via `scikit-learn` (utilizing a standardized preprocessing pipeline), and a fully overhauled, glassmorphism-styled Security Operations Center (SOC) dashboard.
 
 ## Key Upgrades in Version 2.0
-* **7-Dimensional Feature Space:** Expands beyond basic hardware monitoring to simultaneously correlate **Temperature (C), Voltage (V), CPU Utilization (%), Free Heap Memory (KB), Packet Drop Rate (%), I2C Bus Faults, and Network Traffic Volume (KB/s)**.
+* **7-Dimensional Feature Space:** Expands beyond basic hardware monitoring to simultaneously correlate **Temperature (°C), Voltage (V), CPU Utilization (%), Free Heap Memory (KB), Packet Drop Rate (%), I2C Bus Faults, and Network Traffic Volume (KB/s)**.
 * **Optimized Unsupervised Machine Learning Core:** Utilizes an optimized **Isolation Forest** ensemble model wrapped in a `StandardScaler` feature pipeline, achieving a high precision score of **81.04%** and reducing false alarms to 117 while retaining 100.0% recall on evaluated attack scenarios[cite: 6].
 * **Dynamic Tech Stack & Persistence:** Implements SQLAlchemy ORM with native dual support for transactional **SQLite** (default for lightweight edge and local reproducibility) and **PostgreSQL** (for scalable enterprise SOC deployments)[cite: 6].
 * **Multi-Tiered Threat Visualization:** Features dedicated, split-stream charts built with `Chart.js` tracking real-time network volatility and processing loads, alongside a dynamic 3-way traffic distribution matrix (Normal, Warning, Critical)[cite: 6].
 * **Intelligent Forensic Threat Heuristics:** Automatically correlates cross-metric spikes to generate descriptive incident insights (e.g., detecting simultaneous CPU saturation and network flooding)[cite: 6].
 * **Enterprise Security & Compliance:** Secured via `Flask-Login` session management, password hashing (`Werkzeug`), CLI-based administrative provisioning, and an automated ReportLab PDF compliance report generator[cite: 6].
 
-## System Architecture & Metrics
+---
+
+## System Architecture & Visual Walkthrough
+
+### 1. Security Operations Center (SOC) Dashboard
+The glassmorphism-styled SOC dashboard provides real-time monitoring of 7-dimensional IoT telemetry, global metrics, and system integrity indicators[cite: 8].
+> ![SOC Dashboard Overview](Assets%20CS_V2/dashboard.png)
+
+### 2. Incident Management Ledger
+Historical incident tracking showcasing multi-dimensional threat classification, severity badges, and automated forensic insights[cite: 8].
+> ![Incident Management Ledger](Assets%20CS_V2/incidents.png)
+
+### 3. Real-Time Log Analyzer (ToN_IoT Dataset Integration)
+Batch log processing interface evaluating real-world UNSW ToN_IoT network payloads against the optimized Isolation Forest pipeline[cite: 8].
+> ![Log Analyzer Interface](Assets%20CS_V2/loganalyser.png)
+
+### 4. Model Performance Benchmarking
+Comparative visual breakdown tracking Recall, F1-Score, False Positives, and processing latency across Isolation Forest, One-Class SVM, and Local Outlier Factor models[cite: 8].
+> ![Model Performance Comparison](Assets%20CS_V2/comparision.png)
+
+---
+
+### System Architecture Summary Table
 | Metric Category | Parameters Tracked | Primary Threat Vector Addressed |[cite: 6] |
 | :--- | :--- | :--- | :--- |
-| **Hardware Health** | Temperature (C), Voltage (V) | Thermal overloads, Power supply surges, Short circuits[cite: 6] |
+| **Hardware Health** | Temperature (°C), Voltage (V) | Thermal overloads, Power supply surges, Short circuits[cite: 6] |
 | **System Load** | CPU Utilization (%), Free Heap (KB) | Crypto-mining malware, Resource exhaustion, Buffer overflows[cite: 6] |
 | **Network Integrity**| Traffic Volume (KB/s), Packet Drop (%) | DDoS botnet floods, Data exfiltration, Network jamming[cite: 6] |
 | **Bus / Peripheral** | I2C Read Errors / Faults | Physical tampering, Sensor disconnects[cite: 6] |
